@@ -1,0 +1,20 @@
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: tls-secret-injector
+  labels:
+    app.kubernetes.io/name: tls-secret-injector
+
+spec:
+  ports:
+    - name: metrics
+      port: 80
+      targetPort: metrics
+    - name: controller
+      port: 443
+      targetPort: controller
+  selector:
+    app.kubernetes.io/name: tls-secret-injector

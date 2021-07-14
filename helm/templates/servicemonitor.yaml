@@ -1,0 +1,19 @@
+---
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+
+metadata:
+  name: tls-secret-injector
+  labels:
+    app.kubernetes.io/name: tls-secret-injector
+
+spec:
+  endpoints:
+    - port: metrics
+  namespaceSelector:
+    matchNames:
+      - {{ $.Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tls-secret-injector

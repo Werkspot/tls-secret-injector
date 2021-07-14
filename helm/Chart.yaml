@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tls-secret-injector
+description: Listen for Ingresses object created and patch them to have a valid certificate
+type: application
+version: 0.1.0
+appVersion: 0.1.0

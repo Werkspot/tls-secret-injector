@@ -1,0 +1,32 @@
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+
+metadata:
+  name: tls-secret-injector
+  labels:
+    app.kubernetes.io/name: tls-secret-injector
+
+rules:
+  # Grant permissions to list, get and watch Ingresses
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - list
+      - get
+      - watch
+
+  # Grant permissions to manage Secrets
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - watch

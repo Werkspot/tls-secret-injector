@@ -1,0 +1,15 @@
+---
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+
+metadata:
+  name: tls-secret-injector
+  labels:
+    app.kubernetes.io/name: tls-secret-injector
+
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tls-secret-injector

@@ -1,0 +1,19 @@
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+
+metadata:
+  name: tls-secret-injector-tls
+  labels:
+    app.kubernetes.io/name: tls-secret-injector
+
+spec:
+  commonName: tls-secret-injector
+  dnsNames:
+    - tls-secret-injector.{{ $.Release.Namespace }}
+    - tls-secret-injector.{{ $.Release.Namespace }}.svc
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ $.Values.certificate.issuer }}
+  secretName: tls-secret-injector-tls
