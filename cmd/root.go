@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -68,6 +69,8 @@ func bindFlags(flag *pflag.Flag) {
 
 func getCommand() (c *cobra.Command) {
 	pflag.String("cert-dir", "", "Directory that holds the tls.crt and tls.key files")
+	pflag.String("leader-election-resource", "", "Resource name that the leader election will use for holding the leader lock")
+	pflag.String("leader-election-namespace", "", "Namespace in which the leader election resource will be created")
 	pflag.String("log-level", "warning", "Log verbosity level")
 	pflag.String("source-namespace", "", "Namespace containing the original TLS Secret from which we want to copy")
 	pflag.Parse()
@@ -90,6 +93,11 @@ func getCommand() (c *cobra.Command) {
 
 				HealthProbeBindAddress: ":8080",
 				MetricsBindAddress:     ":8081",
+
+				LeaderElection:             true,
+				LeaderElectionID:           viper.GetString("leader-election-resource"),
+				LeaderElectionNamespace:    viper.GetString("leader-election-namespace"),
+				LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
 			})
 			if err != nil {
 				err = fmt.Errorf("unable to set up overall controller manager: %v", err)
