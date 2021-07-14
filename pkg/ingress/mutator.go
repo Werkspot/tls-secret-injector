@@ -91,7 +91,8 @@ func (m *mutator) Handle(ctx context.Context, request admission.Request) admissi
 				Namespace: targetSecretName.Namespace,
 				Name:      targetSecretName.Name,
 				Labels: map[string]string{
-					"app.kubernetes.io/name": "tls-secret-injector",
+					"app.kubernetes.io/name":          "tls-secret-injector",
+					"tls-secret-injector/source-name": targetSecretName.Name,
 				},
 			},
 			Type: sourceSecret.Type,

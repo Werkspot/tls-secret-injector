@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"tls-secret-injector/pkg/ingress"
+	"tls-secret-injector/pkg/secret"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -119,6 +120,12 @@ func getCommand() (c *cobra.Command) {
 
 			// Setup a new controller to reconcile Ingresses
 			err = ingress.NewController(mgr, viper.GetString("source-namespace"))
+			if err != nil {
+				return
+			}
+
+			// Setup a new controller to reconcile Secrets
+			err = secret.NewController(mgr, viper.GetString("source-namespace"))
 			if err != nil {
 				return
 			}
