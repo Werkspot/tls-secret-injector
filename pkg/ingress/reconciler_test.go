@@ -6,20 +6,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/json"
-	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func TestHandle(t *testing.T) {
+func TestReconcile(t *testing.T) {
 	tests := map[string]struct {
 		ingress   networkingv1.Ingress
 		objects   []client.Object
@@ -50,28 +45,22 @@ func TestHandle(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			// Create a client and the mutator
+			test.objects = append(test.objects, &test.ingress)
+
+			// Create a client and the reconciler
 			fakeClient := fake.NewClientBuilder().WithObjects(test.objects...).Build()
-			mutator := newMutator(fakeClient, "source")
+			reconciler := newReconciler(fakeClient, "source")
 
-			decoder, _ := admission.NewDecoder(scheme.Scheme)
-			_ = mutator.InjectDecoder(decoder)
-
-			// Submit the request and verify the response
-			ingressJson, _ := json.Marshal(test.ingress)
-
-			request := admission.Request{
-				AdmissionRequest: admissionv1.AdmissionRequest{
-					Kind:      metav1.GroupVersionKind{Group: "networking.k8s.io", Version: "v1", Kind: "Ingress"},
-					Namespace: test.ingress.ObjectMeta.Namespace,
-					Name:      test.ingress.ObjectMeta.Name,
-					Object:    runtime.RawExtension{Raw: ingressJson},
+			// Reconcile and check for errors
+			request := reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Namespace: test.ingress.Namespace,
+					Name:      test.ingress.Name,
 				},
 			}
-			response := mutator.Handle(context.TODO(), request)
 
-			assert.True(t, response.Allowed)
-			assert.Equal(t, metav1.StatusReason(test.reason), response.Result.Reason)
+			_, err := reconciler.Reconcile(context.TODO(), request)
+			assert.NoError(t, err)
 
 			// Check if the target Secret was created
 			if !reflect.ValueOf(test.newSecret).IsZero() {
