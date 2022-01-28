@@ -1,5 +1,5 @@
 # Build the binary
-FROM golang:1.16-alpine AS builder
+FROM golang:1.17-alpine AS builder
 
 WORKDIR /usr/src/app
 
